@@ -162,7 +162,7 @@ def test(dataloader, model, loss_fn):
     precision = Precision(average = 'macro', num_classes = 10)
     print('precision :', precision(pred,y))
 
-    recall = Recall(average = 'macro', num_classes = 10)
+    recall = Recall(average = 'macro', num_classes = 10) # Calculate the metric for each class separately, and average the metrics across classes 
     print('recall :', recall(pred,y))
     f1_score = F1Score(average = 'macro', num_classes = 10)
     print('f1_score :', f1_score(pred,y))
