@@ -15,7 +15,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 from torchmetrics import Precision, Recall, F1Score, Accuracy
-!pip install torchmetrics
+
 from torchmetrics import Precision, Recall, F1Score, Accuracy
 from torchmetrics.classification import accuracy
 
