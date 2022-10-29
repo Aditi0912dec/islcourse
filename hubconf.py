@@ -16,7 +16,6 @@ import torch.optim as optim
 import numpy as np
 from torchmetrics import Precision, Recall, F1Score, Accuracy
 
-from torchmetrics import Precision, Recall, F1Score, Accuracy
 from torchmetrics.classification import accuracy
 
 
