@@ -18,7 +18,7 @@ from torchmetrics import Precision, Recall, F1Score, Accuracy
 
 from torchmetrics.classification import accuracy
 
-
+!pip install torchmetrics
 
 transform_tensor_to_pil = ToPILImage()
 transform_pil_to_tensor = ToTensor()
