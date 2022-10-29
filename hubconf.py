@@ -43,12 +43,10 @@ def load_data():
     )
     return training_data, test_data
 
-training_data, test_data = load_data()
+
 #mod_train_data = ModifiedDataset(training_data)
 #mod_test_data = ModifiedDataset(test_data)
 
-print (training_data[0][0].shape)
-#print (mod_train_data[0][0].shape)
 
 def create_dataloaders(training_data, test_data, batch_size=64):
 
@@ -63,26 +61,26 @@ def create_dataloaders(training_data, test_data, batch_size=64):
         
     return train_dataloader, test_dataloader
 
-print (len(set([y for x,y in training_data])))
+# print (len(np.unique([y for x,y in training_data])))
 
 train_loader, test_loader = create_dataloaders(training_data, test_data, batch_size = 32)
 
-class cs21m001(nn.Module):
+class cs21d001(nn.Module):
     def __init__(self):
         super().__init__()
         self.m = nn.Softmax(dim =1)
         self.fc1 = nn.Linear(28*28*1, 120)
         self.fc2 = nn.Linear(120, 10)
-
+# till now only structure built , pytorch doesn't know how to connect them using forward the connection will be establish
     def forward(self, x):
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         x = self.m(x)
         return x
+# to see the class count using training set 
+#print((len(np.unique([y for x,y in training_data]))))
 
-y = (len(set([y for x,y in training_data])))
-model = cs21m001()
 
 #train the network
 def train_network(train_loader, optimizer,criteria, e):
@@ -94,18 +92,18 @@ def train_network(train_loader, optimizer,criteria, e):
         inputs, labels = data
 
         # zero the parameter gradients
-        optimizer.zero_grad()
+        optimizer.zero_grad()# to avoid accumilation of the gradients 
 
-        # forward + backward + optimize
+        # forward + backward + optimize (3 imp steps)
         outputs = model(inputs)
         #print(outputs.shape, labels.shape)
-        tmp = torch.nn.functional.one_hot(labels, num_classes= 10)
+        tmp = torch.nn.functional.one_hot(labels, num_classes= 10) # one hot encoding
         loss = criteria(outputs, tmp)
-        loss.backward()
-        optimizer.step()
+        loss.backward()# happens automatically by autograd
+        optimizer.step() # optimize the parameters after backpropogation
 
         # print statistics
-        running_loss += loss.item()
+        running_loss += loss.item()# converts tensor of dim 1 to a python integer
         if i % 2000 == 1999:    # print every 2000 mini-batches
             print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
             running_loss = 0.0
@@ -116,29 +114,14 @@ def train_network(train_loader, optimizer,criteria, e):
 
 #cross entropy
 def loss_fun(y_pred, y_ground):
-  v = -(y_ground * torch.log(y_pred + 0.0001))
+  v = -(y_ground * torch.log(y_pred + 0.0001))# to avoid 0 value some delta added
   v = torch.sum(v)
   return v
 
-x,y = training_data[0]
-model = cs21m001()
-y_pred = model(x)
-print(y_pred.shape)
-print(y_pred)
-print(torch.sum(y_pred))
-#cross_entropy(10,y_pred)
-
-y_ground = y
-loss_val = loss_fun(y_pred, y_ground)
-print(loss_val)
-
-
-
-#train_network(train_loader,optimizer,loss_fun,10)
 
 #write the get model
 def get_model(train_loader,e = 10):
-	model = cs21m001()
+	model = cs21d001()
 	optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 	criteria = loss_fun
 	train_network(train_loader, optimizer,criteria,e)
@@ -148,23 +131,23 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
 def test(dataloader, model, loss_fn):
-    size = len(dataloader.dataset)
-    num_batches = len(dataloader)
+    size = len(dataloader.dataset) # total number of datapoints in the datatset (10000)
+    num_batches = len(dataloader)# number of batches , batch sixze is 32 thus 313 batches
     model.eval()
     test_loss, correct = 0, 0
     with torch.no_grad():
         for X, y in dataloader:
             #X, y = X.to(device), y.to(device)
-            tmp = torch.nn.functional.one_hot(y, num_classes= 10)
+            tmp = torch.nn.functional.one_hot(y, num_classes= 10)# one hot encoding as the prediction vector is of dim(1,10)
             pred = model(X)
             test_loss += loss_fn(pred, tmp).item()
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item() # ?
     test_loss /= num_batches
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
     accuracy1 = Accuracy()
     print('Accuracy :', accuracy1(pred,y))
-    precision = Precision(average = 'macro', num_classes = 10)
+    precision = Precision(average = 'macro', num_classes = 10)# macro for calculating score per class and then taking avaerage of it
     print('precision :', precision(pred,y))
 
     recall = Recall(average = 'macro', num_classes = 10) # Calculate the metric for each class separately, and average the metrics across classes 
